@@ -9,6 +9,8 @@
     "core:default",
     "dialog:default",
     "shell:default",
+    "shell:allow-spawn",
+    "shell:allow-stdin-write",
     "notification:default",
     "opener:default"
   ]

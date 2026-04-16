@@ -115,26 +115,33 @@ pub async fn run_download<F: FnMut(f64)>(
 }
 
 pub fn ffmpeg_sidecar_path(app: &AppHandle) -> Result<String> {
+    let _ = app;
     let exe = std::env::current_exe()?;
     let dir = exe.parent().ok_or_else(|| anyhow!("no exe dir"))?;
     let triple = current_target_triple();
+
+    // Production: Tauri bundles sidecars without the triple suffix
     #[cfg(target_os = "windows")]
-    let name = format!("ffmpeg-{triple}.exe");
+    let bundled = "ffmpeg.exe";
     #[cfg(not(target_os = "windows"))]
-    let name = format!("ffmpeg-{triple}");
-    let candidate = dir.join(&name);
+    let bundled = "ffmpeg";
+    let candidate = dir.join(bundled);
     if candidate.exists() {
         return Ok(candidate.to_string_lossy().to_string());
     }
-    // Dev fallback: src-tauri/binaries
-    let _ = app;
+
+    // Dev: src-tauri/binaries/ffmpeg-{triple}
+    #[cfg(target_os = "windows")]
+    let dev_name = format!("ffmpeg-{triple}.exe");
+    #[cfg(not(target_os = "windows"))]
+    let dev_name = format!("ffmpeg-{triple}");
     let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("binaries")
-        .join(&name);
+        .join(&dev_name);
     if dev.exists() {
         return Ok(dev.to_string_lossy().to_string());
     }
-    Err(anyhow!("ffmpeg sidecar not found: {}", name))
+    Err(anyhow!("ffmpeg sidecar not found"))
 }
 
 fn current_target_triple() -> &'static str {
