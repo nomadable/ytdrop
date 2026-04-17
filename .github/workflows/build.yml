@@ -39,7 +39,7 @@ jobs:
         run: pnpm install
 
       - name: Fetch sidecar binaries
-        run: pnpm fetch-binaries
+        run: pnpm fetch-binaries -- --target ${{ matrix.target }}
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
